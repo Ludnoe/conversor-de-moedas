@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
@@ -6,6 +8,7 @@ public class Principal {
     public static void main(String[] args) {
         Interface interfaceObj = new Interface();
         Servico servicoObj = new Servico();
+        List<String> historico = new ArrayList<>();
 
         while (true) {
 
@@ -17,30 +20,23 @@ public class Principal {
             switch (opcao) {
 
                 case 1:
-                    moedaOrigem = "USD";
-                    moedaDestino = "ARS";
+                    // Seleção de moeda de origem
+                    System.out.println("Selecione o código da moeda de origem ou digite 'outra' para inserir manualmente:");
+                    interfaceObj.exibirMoedasMaisUsadas();
+                    moedaOrigem = interfaceObj.lerCodigoMoeda();
+
+                    // Seleção de moeda de destino
+                    System.out.println("Selecione o código da moeda de destino ou digite 'outra' para inserir manualmente:");
+                    interfaceObj.exibirMoedasMaisUsadas();
+                    moedaDestino = interfaceObj.lerCodigoMoeda();
                     break;
                 case 2:
-                    moedaOrigem = "ARS";
-                    moedaDestino = "USD";
-                    break;
+                    System.out.println("Histórico de conversões:");
+                    for (String item : historico) {
+                        System.out.println(item);
+                    }
+                    continue;
                 case 3:
-                    moedaOrigem = "USD";
-                    moedaDestino = "BRL";
-                    break;
-                case 4:
-                    moedaOrigem = "BRL";
-                    moedaDestino = "USD";
-                    break;
-                case 5:
-                    moedaOrigem = "USD";
-                    moedaDestino = "COP";
-                    break;
-                case 6:
-                    moedaOrigem = "COP";
-                    moedaDestino = "USD";
-                    break;
-                case 7:
                     System.out.println("Saindo...");
                     return;
                 default:
@@ -53,6 +49,10 @@ public class Principal {
             while (true) {
                 try {
                     valor = interfaceObj.lerValorDoUsuario();
+                    if (valor <= 0) {
+                        System.out.println("Valor deve ser positivo. Tente novamente.");
+                        continue;
+                    }
                     break;
                 } catch (InputMismatchException e) {
                     System.out.println("Erro ao ler entrada do usuário. Tente novamente.");
@@ -63,6 +63,10 @@ public class Principal {
             while (true) {
                 try {
                     taxaCambio = servicoObj.getTaxaCambio(moedaOrigem, moedaDestino);
+                    if (taxaCambio <= 0) {
+                        System.out.println("Taxa de câmbio inválida. Tente novamente.");
+                        continue;
+                    }
                     break;
                 } catch (Exception e) {
                     System.out.println("Erro ao obter taxa de câmbio. Tente novamente.");
@@ -79,7 +83,11 @@ public class Principal {
                 }
             }
 
-            System.out.println("Valor convertido: " + valorConvertido);
+            String simboloOrigem = servicoObj.getSimboloMoeda(moedaOrigem);
+            String simboloDestino = servicoObj.getSimboloMoeda(moedaDestino);
+            String resultado = String.format("Convertido %s%.2f %s para %s%.2f %s", simboloOrigem, valor, moedaOrigem, simboloDestino, valorConvertido, moedaDestino);
+            System.out.println("Valor convertido: " + simboloDestino + String.format("%.2f", valorConvertido));
+            historico.add(resultado);
 
             System.out.println("Deseja continuar? (S/N)");
             Scanner scanner = new Scanner(System.in);
